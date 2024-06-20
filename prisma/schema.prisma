@@ -1,0 +1,163 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider     = "mongodb"
+  url          = env("DATABASE_URL")
+  relationMode = "prisma"
+}
+
+model Video {
+  id              String             @id @default(auto()) @map("_id") @db.ObjectId
+  title           String?
+  thumbnailUrl    String?
+  description     String?
+  videoUrl        String
+  publish         Boolean            @default(true)
+  userId          String             @db.ObjectId
+  createdAt       DateTime           @default(now())
+  UpdatedAt       DateTime           @updatedAt
+  user            User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  VideoEngagement VideoEngagement[]
+  comments        Comment[]
+  playlists       PlaylistHasVideo[]
+}
+
+model VideoEngagement {
+  id             String         @id @default(auto()) @map("_id") @db.ObjectId
+  userId         String?        @db.ObjectId
+  videoId        String         @db.ObjectId
+  CreatedAt      DateTime       @default(now())
+  UpdatedAt      DateTime       @updatedAt
+  engagementType EngagementType
+  user           User?          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  video          Video          @relation(fields: [videoId], references: [id], onDelete: Cascade)
+}
+
+enum EngagementType {
+  LIKE
+  DISLIKE
+  VIEW
+  SAVE
+  FOLLOW
+}
+
+model Comment {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  message   String
+  videoId   String   @db.ObjectId
+  userId    String   @db.ObjectId
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  video     Video    @relation(fields: [videoId], references: [id], onDelete: Cascade)
+}
+
+model Announcement {
+  id                     String                   @id @default(auto()) @map("_id") @db.ObjectId
+  message                String
+  userId                 String                   @db.ObjectId
+  createdAt              DateTime                 @default(now())
+  updatedAt              DateTime                 @updatedAt
+  user                   User                     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  AnnouncementEngagement AnnouncementEngagement[]
+}
+
+model AnnouncementEngagement {
+  id             String         @id @default(auto()) @map("_id") @db.ObjectId
+  userId         String         @db.ObjectId
+  announcementId String         @unique @db.ObjectId
+  engagementType EngagementType
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  user           User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  announcement   Announcement   @relation(fields: [announcementId], references: [id], onDelete: Cascade)
+}
+
+model FollowEngagement {
+  id             String         @id @default(auto()) @map("_id") @db.ObjectId
+  followerId     String         @db.ObjectId
+  followingId    String         @db.ObjectId
+  engagementType EngagementType
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  following      User           @relation("Followings", fields: [followingId], references: [id], onDelete: Cascade)
+  follower       User           @relation("Followers", fields: [followerId], references: [id], onDelete: Cascade)
+}
+
+model Playlist {
+  id          String             @id @default(auto()) @map("_id") @db.ObjectId
+  title       String
+  description String?
+  userId      String             @db.ObjectId
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+  user        User?              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  videos      PlaylistHasVideo[]
+}
+
+model PlaylistHasVideo {
+  id         String    @id @default(auto()) @map("_id") @db.ObjectId
+  playlistId String    @db.ObjectId
+  videoId    String    @db.ObjectId
+  playlist   Playlist? @relation(fields: [playlistId], references: [id], onDelete: Cascade)
+  video      Video?    @relation(fields: [videoId], references: [id], onDelete: Cascade)
+}
+
+// Necessary for Next auth
+model Account {
+  id                String  @id @default(auto()) @map("_id") @db.ObjectId
+  userId            String  @unique @db.ObjectId
+  type              String
+  provider          String
+  providerAccountId String
+  refreshToken      String? @db.String
+  accessToken       String? @db.String
+  expiresAt         Int?
+  tokenType         String?
+  scope             String?
+  idToken           String? @db.String
+  sessionState      String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  sessionToken String   @unique
+  userId       String   @unique @db.ObjectId
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model User {
+  id                     String                   @id @default(auto()) @map("_id") @db.ObjectId
+  name                   String?
+  email                  String?                  @unique
+  emailVerified          DateTime?
+  image                  String?
+  backgroundImage        String?
+  handle                 String?                  @unique
+  description            String?
+  accounts               Account[]
+  sessions               Session[]
+  videos                 Video[]
+  VideoEngagement        VideoEngagement[]
+  Comments               Comment[]
+  Announcements          Announcement[]
+  AnnouncementEngagement AnnouncementEngagement[]
+  followers              FollowEngagement[]       @relation("Followings")
+  followings             FollowEngagement[]       @relation("Followers")
+  playlists              Playlist[]
+}
+
+model VerificationToken {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
