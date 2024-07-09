@@ -34,19 +34,14 @@ export const MultiColumnVideo: React.FC<VideoComponentProps> = ({
             href={`/video/${video.id}`}
             className="flex flex-col items-start justify-between hover:bg-gray-100"
           >
-            <div className="relative w-full">
+            <div className="relative w-full ">
               <Thumbnail thumbnailUrl={video.thumbnailUrl} />
-              <div className="max-w-xl">
-                <div className="items-top relative mt-4 flex gap-x-4">
-                  <UserImage image={user.image} />
-                  <div className="w-full">
-                    <VideoTitle title={video.title} limitHeight />
-                    <VideoInfo
-                      views={video.views}
-                      createdAt={video.createdAt}
-                    />
-                    <UserName name={user.name || ""} />
-                  </div>
+              <div className="items-top relative mt-4 flex gap-x-4">
+                <UserImage image={user.image} />
+                <div className="w-[300px]">
+                  <VideoTitle title={video.title} limitHeight />
+                  <VideoInfo views={video.views} createdAt={video.createdAt} />
+                  <UserName name={user.name || ""} />
                 </div>
               </div>
             </div>
