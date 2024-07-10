@@ -23,7 +23,7 @@ export const MultiColumnVideo: React.FC<VideoComponentProps> = ({
   users,
 }) => {
   return (
-    <div className="mx-auto grid grid-cols-1 gap-x-4 gap-y-8 sm:grid-cols-2 md:mx-0 md:max-w-none md:grid-cols-3 lg:mx-0 lg:max-w-none lg:grid-cols-4 xl:mx-0 xl:max-w-none xl:grid-cols-5 2xl:mx-0 2xl:max-w-none 2xl:grid-cols-5">
+    <div className="mx-auto grid grid-cols-1 gap-x-4 gap-y-8 md:mx-0 md:max-w-none md:grid-cols-2 lg:mx-0 lg:max-w-none lg:grid-cols-4 xl:mx-0 xl:max-w-none xl:grid-cols-5 2xl:mx-0 2xl:max-w-none 2xl:grid-cols-6">
       {videos.map((video, index) => {
         const user = users[index];
         if (!user) return null;
